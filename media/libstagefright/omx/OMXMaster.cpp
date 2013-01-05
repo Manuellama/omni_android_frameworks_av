@@ -46,8 +46,13 @@ OMXMaster::~OMXMaster() {
 void OMXMaster::addVendorPlugin() {
     addPlugin("libstagefrighthw.so");
 
+
 #ifdef TF101_OMX
     addPlugin("libnvomx.so");
+#endif
+
+#ifdef SAMSUNG_OMX
+    addPlugin("libsomxcore.so");
 #endif
 }
 
