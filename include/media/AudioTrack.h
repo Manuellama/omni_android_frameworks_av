@@ -298,7 +298,7 @@ public:
      * This includes the latency due to AudioTrack buffer size, AudioMixer (if any)
      * and audio hardware driver.
      */
-#if defined(QCOM_HARDWARE) || defined(OARD_OMX_NEEDS_LEGACY_AUDIO)
+#if defined(QCOM_HARDWARE) || defined(BOARD_OMX_NEEDS_LEGACY_AUDIO)
             uint32_t    latency() const;
 #else
             uint32_t    latency() const     { return mLatency; }
