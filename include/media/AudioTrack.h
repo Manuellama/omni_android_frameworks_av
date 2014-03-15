@@ -228,7 +228,8 @@ public:
                                     const audio_offload_info_t *offloadInfo = NULL,
                                     int uid = -1);
 
-#ifdef BOARD_OMX_NEEDS_LEGACY_AUDIO
+#ifdef USE_OMX_COMPAT
+                        // DEPRECATED
                         explicit AudioTrack( int streamType,
                                     uint32_t sampleRate  = 0,
                                     int format = AUDIO_FORMAT_DEFAULT,
@@ -288,7 +289,7 @@ public:
      * an uninitialized AudioTrack produces undefined results.
      * See set() method above for possible return codes.
      */
-#ifdef BOARD_OMX_NEEDS_LEGACY_AUDIO
+#ifdef USE_OMX_COMPAT
             status_t    initCheck() const;
 #else
             status_t    initCheck() const   { return mStatus; }
@@ -298,38 +299,37 @@ public:
      * This includes the latency due to AudioTrack buffer size, AudioMixer (if any)
      * and audio hardware driver.
      */
-#if defined(QCOM_HARDWARE) || defined(BOARD_OMX_NEEDS_LEGACY_AUDIO)
+#if defined(USE_OMX_COMPAT) || defined(QCOM_HARDWARE)
             uint32_t    latency() const;
 #else
             uint32_t    latency() const     { return mLatency; }
 #endif
 
-    /* getters, see constructors and set() */
 
-#ifdef BOARD_OMX_NEEDS_LEGACY_AUDIO
+    /* getters, see constructors and set() */
+#ifdef USE_OMX_COMPAT
             audio_stream_type_t streamType() const;
             audio_format_t format() const;
 #else
             audio_stream_type_t streamType() const { return mStreamType; }
             audio_format_t format() const   { return mFormat; }
 #endif
-
     /* Return frame size in bytes, which for linear PCM is
      * channelCount * (bit depth per channel / 8).
      * channelCount is determined from channelMask, and bit depth comes from format.
      * For non-linear formats, the frame size is typically 1 byte.
      */
-#ifdef BOARD_OMX_NEEDS_LEGACY_AUDIO
-            size_t      frameSize() const;
+#ifdef USE_OMX_COMPAT
             uint32_t    channelCount() const;
+
             uint32_t    frameCount() const;
+            size_t      frameSize() const;
 #else
             size_t      frameSize() const   { return mFrameSize; }
 
             uint32_t    channelCount() const { return mChannelCount; }
             uint32_t    frameCount() const  { return mFrameCount; }
 #endif
-
     /* Return the static buffer specified in constructor or set(), or 0 for streaming mode */
             sp<IMemory> sharedBuffer() const { return mSharedBuffer; }
 
@@ -511,12 +511,11 @@ public:
      * Returned value:
      *  AudioTrack session ID.
      */
-#ifdef BOARD_OMX_NEEDS_LEGACY_AUDIO
+#ifdef USE_OMX_COMPAT
             int    getSessionId() const;
 #else
             int    getSessionId() const { return mSessionId; }
 #endif
-
     /* Attach track auxiliary output to specified effect. Use effectId = 0
      * to detach track from effect.
      *

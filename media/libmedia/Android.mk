@@ -73,15 +73,19 @@ endif
 
 LOCAL_SRC_FILES += ../libnbaio/roundup.c
 
+ifeq ($(BOARD_NEED_OMX_COMPAT),true)
+    LOCAL_CFLAGS += -DUSE_OMX_COMPAT
+endif
+
+ifeq ($(BOARD_NEED_OMX_COMPAT_XOOM),true)
+    LOCAL_CFLAGS += -DUSE_OMX_COMPAT_XOOM
+endif
+
 # for <cutils/atomic-inline.h>
 LOCAL_CFLAGS += -DANDROID_SMP=$(if $(findstring true,$(TARGET_CPU_SMP)),1,0)
 LOCAL_SRC_FILES += SingleStateQueue.cpp
 LOCAL_CFLAGS += -DSINGLE_STATE_QUEUE_INSTANTIATIONS='"SingleStateQueueInstantiations.cpp"'
 # Consider a separate a library for SingleStateQueueInstantiations.
-
-ifeq ($(BOARD_OMX_NEEDS_LEGACY_AUDIO),true)
-	LOCAL_CFLAGS += -DBOARD_OMX_NEEDS_LEGACY_AUDIO
-endif
 
 LOCAL_SHARED_LIBRARIES := \
 	libui liblog libcutils libutils libbinder libsonivox libicuuc libexpat \
