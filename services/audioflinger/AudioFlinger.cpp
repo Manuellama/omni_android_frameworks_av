@@ -65,6 +65,7 @@
 #include "AudioMixer.h"
 #include "AudioFlinger.h"
 #include "ServiceUtilities.h"
+#include "PackageManager.h"
 
 #include <media/EffectsFactoryApi.h>
 #include <audio_effects/effect_visualizer.h>
@@ -1341,11 +1342,14 @@ void AudioFlinger::registerClient(const sp<IAudioFlingerClient>& client)
 
     Mutex::Autolock _l(mLock);
 
-    pid_t pid = IPCThreadState::self()->getCallingPid();
+    IPCThreadState* ipcState = IPCThreadState::self();
+    pid_t pid = ipcState->getCallingPid();
+    uid_t uid = ipcState->getCallingUid();
     if (mNotificationClients.indexOfKey(pid) < 0) {
         sp<NotificationClient> notificationClient = new NotificationClient(this,
                                                                             client,
-                                                                            pid);
+                                                                            pid,
+                                                                            getNameForUid(uid));
         ALOGV("registerClient() client %p, pid %d", notificationClient.get(), pid);
 
         mNotificationClients.add(pid, notificationClient);
@@ -1519,8 +1523,8 @@ void AudioFlinger::Client::releaseTimedTrack()
 
 AudioFlinger::NotificationClient::NotificationClient(const sp<AudioFlinger>& audioFlinger,
                                                      const sp<IAudioFlingerClient>& client,
-                                                     pid_t pid)
-    : mAudioFlinger(audioFlinger), mPid(pid), mAudioFlingerClient(client)
+                                                     pid_t pid, const String16 clientName)
+    : mAudioFlinger(audioFlinger), mPid(pid), mAudioFlingerClient(client), mClientName(clientName)
 {
 }
 
@@ -1565,7 +1569,7 @@ sp<IAudioRecord> AudioFlinger::openRecord(
 #endif
 
     // check calling permissions
-    if (!recordingAllowed()) {
+    if (!recordingAllowed() || !checkAudioRecordOp()) {
         ALOGE("openRecord() permission denied: recording not allowed");
         lStatus = PERMISSION_DENIED;
         goto Exit;
@@ -1928,13 +1932,16 @@ audio_io_handle_t AudioFlinger::openOutput(audio_module_handle_t module,
             thread = new MixerThread(this, output, id, *pDevices);
             ALOGV("openOutput() created mixer output: ID %d thread %p", id, thread);
         }
+
+
+#ifdef QCOM_DIRECTTRACK
         if (thread != NULL) {
+#endif
             mPlaybackThreads.add(id, thread);
 #ifdef QCOM_DIRECTTRACK
             thread->mOutputFlags = flags;
-#endif
         }
-
+#endif
         if (pSamplingRate != NULL) {
             *pSamplingRate = config.sample_rate;
         }
@@ -1944,12 +1951,14 @@ audio_io_handle_t AudioFlinger::openOutput(audio_module_handle_t module,
         if (pChannelMask != NULL) {
             *pChannelMask = config.channel_mask;
         }
+#ifdef QCOM_DIRECTTRACK
         if (thread != NULL) {
+#endif
             if (pLatencyMs != NULL) *pLatencyMs = thread->latency();
             // notify client processes of the new output creation
             thread->audioConfigChanged_l(AudioSystem::OUTPUT_OPENED);
-        }
 #ifdef QCOM_DIRECTTRACK
+        }
         else {
             *pLatencyMs = 0;
             if ((flags & AUDIO_OUTPUT_FLAG_LPA) || (flags & AUDIO_OUTPUT_FLAG_TUNNEL)) {
@@ -2636,7 +2645,7 @@ sp<IEffect> AudioFlinger::createEffect(
 
         // check recording permission for visualizer
         if ((memcmp(&desc.type, SL_IID_VISUALIZATION, sizeof(effect_uuid_t)) == 0) &&
-            !recordingAllowed()) {
+            (!recordingAllowed() || !checkAudioRecordOp())) {
             lStatus = PERMISSION_DENIED;
             goto Exit;
         }
@@ -2987,6 +2996,35 @@ status_t AudioFlinger::onTransact(
         uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
     return BnAudioFlinger::onTransact(code, data, reply, flags);
+}
+
+bool AudioFlinger::checkAudioRecordOp()
+{
+    IPCThreadState* ipcState = IPCThreadState::self();
+    pid_t pid = ipcState->getCallingPid();
+    uid_t uid = ipcState->getCallingUid();
+
+    if (uid < AID_APP) {
+        return true;
+    }
+
+    Mutex::Autolock _l(mLock);
+
+    {
+        String16 clientName;
+        int index = mNotificationClients.indexOfKey(pid);
+        if (index >= 0) {
+            clientName = mNotificationClients.valueAt(index)->clientName();
+        }
+
+        if (clientName.size() <= 0) {
+            return true;
+        }
+
+        // check AppOp permission
+        return (mAppOpsManager.noteOp(AppOpsManager::OP_RECORD_AUDIO, uid, clientName) ==
+                AppOpsManager::MODE_ALLOWED);
+    }
 }
 
 }; // namespace android
