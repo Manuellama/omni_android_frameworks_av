@@ -3559,6 +3559,11 @@ void OMXCodec::drainInputBuffers() {
                 continue;
             }
 
+#if defined OMAP_ENHANCEMENT && defined TARGET_OMAP3
+            if (mIsEncoder && mIsVideo && (i == 4)) {
+                break;
+            }
+#endif
             if (!drainInputBuffer(info)) {
                 break;
             }
@@ -3747,23 +3752,6 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
         }
 
         bool releaseBuffer = true;
-#ifdef OMAP_ENHANCEMENT
-        if (mIsEncoder && (mQuirks & kAvoidMemcopyInputRecordingFrames)) {
-            CHECK(mOMXLivesLocally && offset == 0);
-
-            OMX_BUFFERHEADERTYPE *header =
-                (OMX_BUFFERHEADERTYPE *)info->mBuffer;
-
-            CHECK(header->pBuffer == info->mData);
-
-            header->pBuffer =
-                (OMX_U8 *)srcBuffer->data() + srcBuffer->range_offset();
-
-            releaseBuffer = false;
-            info->mMediaBuffer = srcBuffer;
-        } else {
-#endif
-
         if (mFlags & kStoreMetaDataInVideoBuffers) {
                 releaseBuffer = false;
                 info->mMediaBuffer = srcBuffer;
@@ -3776,6 +3764,21 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
 
                 CHECK(info->mMediaBuffer == NULL);
                 info->mMediaBuffer = srcBuffer;
+#ifdef OMAP_ENHANCEMENT
+        } else if (mIsEncoder && (mQuirks & kAvoidMemcopyInputRecordingFrames)) {
+                CHECK(mOMXLivesLocally && offset == 0);
+
+                OMX_BUFFERHEADERTYPE *header =
+                    (OMX_BUFFERHEADERTYPE *)info->mBuffer;
+
+                CHECK(header->pBuffer == info->mData);
+
+                header->pBuffer =
+                    (OMX_U8 *)srcBuffer->data() + srcBuffer->range_offset();
+
+                releaseBuffer = false;
+                info->mMediaBuffer = srcBuffer;
+#endif
         } else {
 #ifdef USE_SAMSUNG_COLORFORMAT
             OMX_PARAM_PORTDEFINITIONTYPE def;
@@ -3819,10 +3822,6 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
                     srcBuffer->range_length());
 #endif // USE_SAMSUNG_COLORFORMAT
         }
-
-#ifdef OMAP_ENHANCEMENT
-	}
-#endif
 
         int64_t lastBufferTimeUs;
         CHECK(srcBuffer->meta_data()->findInt64(kKeyTime, &lastBufferTimeUs));
@@ -4519,7 +4518,7 @@ status_t OMXCodec::setFLACFormat(const sp<MetaData> &meta)
 
     CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
     CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
-    //CHECK(meta->findInt32(kKeyBitspersample, &bitsPerSample));
+    CHECK(meta->findInt32(kKeySampleBits, &bitsPerSample));
 
     CODEC_LOGV("Channels: %d, SampleRate: %d",
             numChannels, sampleRate);
@@ -4622,7 +4621,7 @@ status_t OMXCodec::setAPEFormat(const sp<MetaData> &meta)
 
     CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
     CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
-    CHECK(meta->findInt32(kKeyBitspersample, &bitsPerSample));
+    CHECK(meta->findInt32(kKeySampleBits, &bitsPerSample));
 
     CODEC_LOGV("Channels:%d, SampleRate:%d, bitsPerSample:%d",
             numChannels, sampleRate, bitsPerSample);
@@ -4699,7 +4698,7 @@ status_t OMXCodec::setFFmpegAudioFormat(const sp<MetaData> &meta)
     CHECK(meta->findInt32(kKeyCodecId, &codec_id));
     CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
     CHECK(meta->findInt32(kKeyBitRate, &bitRate));
-    CHECK(meta->findInt32(kKeyBitspersample, &bitsPerSample));
+    CHECK(meta->findInt32(kKeySampleBits, &bitsPerSample));
     CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
     CHECK(meta->findInt32(kKeyBlockAlign, &blockAlign));
     CHECK(meta->findInt32(kKeySampleFormat, &sampleFormat));
@@ -4722,6 +4721,7 @@ status_t OMXCodec::setFFmpegAudioFormat(const sp<MetaData> &meta)
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamAudioFFmpeg, &param, sizeof(param));
+
     return err;
 }
 
@@ -5137,13 +5137,16 @@ status_t OMXCodec::read(
             mPaused = false;
         }
 
+        if (mQuirks & kRequiresFlushCompleteEmulation)
+            drainInputBuffers();
 
         if (mState == EXECUTING) {
             // Otherwise mState == RECONFIGURING and this code will trigger
             // after the output port is reenabled.
             fillOutputBuffers();
         }
-        drainInputBuffers();
+        if (!(mQuirks & kRequiresFlushCompleteEmulation))
+            drainInputBuffers();
     }
 
     if (seeking) {

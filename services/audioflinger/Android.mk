@@ -34,7 +34,6 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=               \
-    PackageManager.cpp          \
     AudioFlinger.cpp            \
     Threads.cpp                 \
     Tracks.cpp                  \
@@ -92,6 +91,10 @@ endif
 
 ifeq ($(BOARD_HAVE_PRE_KITKAT_AUDIO_BLOB),true)
     LOCAL_CFLAGS += -DHAVE_PRE_KITKAT_AUDIO_BLOB
+endif
+
+ifeq ($(BOARD_HAVE_PRE_KITKAT_AUDIO_POLICY_BLOB),true)
+    LOCAL_CFLAGS += -DHAVE_PRE_KITKAT_AUDIO_POLICY_BLOB
 endif
 
 LOCAL_CFLAGS += -fvisibility=hidden
