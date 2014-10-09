@@ -45,6 +45,10 @@ OMXMaster::~OMXMaster() {
 
 void OMXMaster::addVendorPlugin() {
     addPlugin("libstagefrighthw.so");
+
+#ifdef TF101_OMX
+    addPlugin("libnvomx.so");
+#endif
 }
 
 void OMXMaster::addPlugin(const char *libname) {
@@ -80,6 +84,7 @@ void OMXMaster::addPlugin(OMXPluginBase *plugin) {
                     name, sizeof(name), index++)) == OMX_ErrorNone) {
         String8 name8(name);
 
+        //ALOGV("plugin %d:%s ", plugin, name8.string());
         if (mPluginByComponentName.indexOfKey(name8) >= 0) {
             ALOGE("A component of name '%s' already exists, ignoring this one.",
                  name8.string());
@@ -106,13 +111,28 @@ void OMXMaster::clearPlugins() {
 
     mPluginByComponentName.clear();
 
+#ifdef TF101_OMX
+    int plugin = 1;
+#endif
     for (List<OMXPluginBase *>::iterator it = mPlugins.begin();
             it != mPlugins.end(); ++it) {
         if (destroyOMXPlugin)
             destroyOMXPlugin(*it);
+#ifdef TF101_OMX
+        else {
+           ALOGV("plugin %d", *it);
+           if( *it != NULL && plugin != 1) // 1st plugin is NV, crashes on delete => skip, better than crash for the moment
+	      delete *it;
+        }
+
+        *it = NULL;
+    plugin++;
+#else
         else
             delete *it;
+
         *it = NULL;
+#endif
     }
 
     mPlugins.clear();
