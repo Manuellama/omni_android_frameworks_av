@@ -86,6 +86,10 @@ ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
     endif
 endif
 
+ifneq ($(AUDIO_FEATURE_ENABLED_ULTRA_LOW_LATENCY),true)
+    LOCAL_CFLAGS += -DNATIVE_FAST_TRACKS_ONLY
+endif
+
 # for <cutils/atomic-inline.h>
 LOCAL_CFLAGS += -DANDROID_SMP=$(if $(findstring true,$(TARGET_CPU_SMP)),1,0)
 LOCAL_SRC_FILES += SingleStateQueue.cpp
@@ -98,6 +102,14 @@ endif #TARGET_ENABLE_AV_ENHANCEMENTS
 ifeq ($(BOARD_OMX_NEEDS_LEGACY_AUDIO),true)
 	LOCAL_CFLAGS += -DBOARD_OMX_NEEDS_LEGACY_AUDIO
 endif
+
+#QTI Resampler
+ifeq ($(call is-vendor-board-platform,QCOM),true)
+ifeq ($(strip $(BOARD_USES_QCOM_RESAMPLER)),true)
+LOCAL_CFLAGS += -DQTI_RESAMPLER
+endif
+endif
+#QTI Resampler
 
 LOCAL_SHARED_LIBRARIES := \
 	libui liblog libcutils libutils libbinder libsonivox libicuuc libexpat \
