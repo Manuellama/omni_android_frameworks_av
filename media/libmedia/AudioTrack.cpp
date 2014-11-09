@@ -121,31 +121,32 @@ status_t AudioTrack::getMinFrameCount(
 
 // ---------------------------------------------------------------------------
 // DEPRECATED
-AudioTrack::AudioTrack(
-        int streamType,
-        uint32_t sampleRate,
-        int format,
-        int channelMask,
-        int frameCount,
-        uint32_t flags,
-        callback_t cbf,
-        void* user,
-        int notificationFrames,
-        int sessionId)
-    : mCblk(NULL),
-      mStatus(NO_INIT),
-      mIsTimed(false),
-      mPreviousPriority(ANDROID_PRIORITY_NORMAL), mPreviousSchedulingGroup(SP_DEFAULT)
-#ifdef QCOM_HARDWARE
-      ,mAudioFlinger(NULL),
-      mObserver(NULL)
-#endif
-{
-    mStatus = set((audio_stream_type_t)streamType, sampleRate, (audio_format_t)format,
-            (audio_channel_mask_t) channelMask,
-            frameCount, (audio_output_flags_t)flags, cbf, user, notificationFrames,
-            0 /*sharedBuffer*/, false /*threadCanCallJava*/, sessionId);
-}
+// AudioTrack::AudioTrack(
+//         int streamType,
+//         uint32_t sampleRate,
+//         int format,
+//         int channelMask,
+//         int frameCount,
+//         uint32_t flags,
+//         callback_t cbf,
+//         void* user,
+//         int notificationFrames,
+//         int sessionId)
+//     : mCblk(NULL),
+//       mStatus(NO_INIT),
+//       mIsTimed(false),
+//       mPreviousPriority(ANDROID_PRIORITY_NORMAL), mPreviousSchedulingGroup(SP_DEFAULT)
+// #ifdef QCOM_HARDWARE
+//       ,mAudioFlinger(NULL),
+//       mObserver(NULL)
+// #endif
+// {
+//     mStatus = set((audio_stream_type_t)streamType, sampleRate, (audio_format_t)format,
+//             (audio_channel_mask_t) channelMask,
+//             frameCount, (audio_output_flags_t)flags, cbf, user, notificationFrames,
+//             0 /*sharedBuffer*/, false /*threadCanCallJava*/, sessionId,
+//             TRANSFER_DEFAULT, -1, -1, NULL);
+// }
 
 
 
