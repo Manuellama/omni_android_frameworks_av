@@ -55,6 +55,12 @@ void MediaBufferGroup::add_buffer(MediaBuffer *buffer) {
     mLastBuffer = buffer;
 }
 
+#ifdef ICS_AUDIO_BLOB
+status_t MediaBufferGroup::acquire_buffer(MediaBuffer **out) {
+    return acquire_buffer(out, false);
+}
+#endif
+
 status_t MediaBufferGroup::acquire_buffer(
         MediaBuffer **out, bool nonBlocking) {
     Mutex::Autolock autoLock(mLock);
