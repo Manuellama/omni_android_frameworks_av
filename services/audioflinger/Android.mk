@@ -75,6 +75,10 @@ else
     LOCAL_CFLAGS += -DANDROID_SMP=0
 endif
 
+ifeq ($(AUDIO_LEGACY_HACK),true)
+    LOCAL_CFLAGS += -DAUDIO_LEGACY_HACK
+endif
+
 LOCAL_CFLAGS += -fvisibility=hidden
 
 include $(BUILD_SHARED_LIBRARY)
