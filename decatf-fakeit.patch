@@ -1,0 +1,15 @@
++++ b/media/libmedia/AudioSystem.cpp
+@@ -390,7 +390,12 @@ status_t AudioSystem::getInputBufferSize(uint32_t sampleRate, audio_format_t for
+         if (af == 0) {
+             return PERMISSION_DENIED;
+         }
+-        inBuffSize = af->getInputBufferSize(sampleRate, format, channelMask);
++        // inBuffSize = af->getInputBufferSize(sampleRate, format, channelMask);
++        inBuffSize = (1024 * sampleRate) / 44100;
++        inBuffSize = ((inBuffSize + 15) / 16) * 16;
++        inBuffSize = (inBuffSize * popcount(channelMask) *
++            audio_bytes_per_sample(format));
++
+         if (inBuffSize == 0) {
+             ALOGE("AudioSystem::getInputBufferSize failed sampleRate %d format %#x channelMask %x",
+                     sampleRate, format, channelMask);

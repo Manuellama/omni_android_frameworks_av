@@ -228,6 +228,9 @@ audio_io_handle_t AudioPolicyService::getInput(audio_source_t inputSource,
         return 0;
     }
     // already checked by client, but double-check in case the client wrapper is bypassed
+	//
+	// Well it may prevent the US gov from secretly taping the mic but it prevents me from using the mic too.
+	/**
     if (inputSource >= AUDIO_SOURCE_CNT && inputSource != AUDIO_SOURCE_HOTWORD) {
         return 0;
     }
@@ -235,6 +238,7 @@ audio_io_handle_t AudioPolicyService::getInput(audio_source_t inputSource,
     if ((inputSource == AUDIO_SOURCE_HOTWORD) && !captureHotwordAllowed()) {
         return 0;
     }
+	*/
 
     audio_io_handle_t input;
     sp<AudioPolicyEffects>audioPolicyEffects;
