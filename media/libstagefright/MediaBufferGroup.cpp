@@ -55,7 +55,7 @@ void MediaBufferGroup::add_buffer(MediaBuffer *buffer) {
     mLastBuffer = buffer;
 }
 
-#ifdef ICS_AUDIO_BLOB || USES_LEGACY_ACQUIRE_WVM
+#if defined(ICS_AUDIO_BLOB) || defined(USES_LEGACY_ACQUIRE_WVM)
 status_t MediaBufferGroup::acquire_buffer(MediaBuffer **out) {
     return acquire_buffer(out, false);
 }

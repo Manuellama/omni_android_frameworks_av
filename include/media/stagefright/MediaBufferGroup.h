@@ -35,7 +35,7 @@ public:
     void add_buffer(MediaBuffer *buffer);
 
 
-#ifdef ICS_AUDIO_BLOB || USES_LEGACY_ACQUIRE_WVM
+#if defined(ICS_AUDIO_BLOB) || defined(USES_LEGACY_ACQUIRE_WVM)
     // Blocks until a buffer is available and returns it to the caller,
     // the returned buffer will have a reference count of 1.
     status_t acquire_buffer(MediaBuffer **buffer);
