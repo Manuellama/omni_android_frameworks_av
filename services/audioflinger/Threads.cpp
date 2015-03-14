@@ -4360,17 +4360,10 @@ void AudioFlinger::DirectOutputThread::cacheParameters_l()
 
 void AudioFlinger::DirectOutputThread::flushHw_l()
 {
-<<<<<<< HEAD
-#ifndef ICS_AUDIO_BLOB
-    if (mOutput->stream->flush != NULL)
-        mOutput->stream->flush(mOutput->stream);
-#endif
-=======
     if (mOutput->stream->flush != NULL) {
         mOutput->stream->flush(mOutput->stream);
     }
     mHwPaused = false;
->>>>>>> upstream/android-5.1
 }
 
 // ----------------------------------------------------------------------------
