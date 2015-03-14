@@ -2074,7 +2074,6 @@ bool AudioPolicyManager::isStreamActive(audio_stream_type_t stream, uint32_t inP
 bool AudioPolicyManager::isStreamActiveRemotely(audio_stream_type_t stream,
                                                     uint32_t inPastMs) const
 {
-#ifndef ICS_AUDIO_BLOB
     nsecs_t sysTime = systemTime();
     for (size_t i = 0; i < mOutputs.size(); i++) {
         const sp<AudioOutputDescriptor> outputDesc = mOutputs.valueAt(i);
@@ -2087,13 +2086,11 @@ bool AudioPolicyManager::isStreamActiveRemotely(audio_stream_type_t stream,
             }
         }
     }
-#endif
     return false;
 }
 
 bool AudioPolicyManager::isSourceActive(audio_source_t source) const
 {
-#ifndef ICS_AUDIO_BLOB
     for (size_t i = 0; i < mInputs.size(); i++) {
         const sp<AudioInputDescriptor>  inputDescriptor = mInputs.valueAt(i);
         if (inputDescriptor->mRefCount == 0) {
@@ -2114,7 +2111,6 @@ bool AudioPolicyManager::isSourceActive(audio_source_t source) const
             }
         }
     }
-#endif
     return false;
 }
 

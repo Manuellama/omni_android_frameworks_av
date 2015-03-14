@@ -124,7 +124,6 @@ struct BufferMeta {
             header->nAllocLen - header->nOffset : header->nFilledLen;
 #endif
         memcpy((OMX_U8 *)mMem->pointer() + header->nOffset,
-
 #ifdef TF101_OMX
                header->pBuffer + header->nOffset, bytesToCopy);
 #else
@@ -132,6 +131,7 @@ struct BufferMeta {
                header->nFilledLen);
 #endif
     }
+
 
     void CopyToOMX(const OMX_BUFFERHEADERTYPE *header) {
         if (!mIsBackup) {
@@ -143,14 +143,13 @@ struct BufferMeta {
             header->nAllocLen - header->nOffset : header->nFilledLen;
 #endif
         memcpy(header->pBuffer + header->nOffset,
-
 #ifdef TF101_OMX
                (const OMX_U8 *)mMem->pointer() + header->nOffset, bytesToCopy);
 #else
                (const OMX_U8 *)mMem->pointer() + header->nOffset,
                header->nFilledLen);
 #endif
-    }
+	}
 
     void setGraphicBuffer(const sp<GraphicBuffer> &graphicBuffer) {
         mGraphicBuffer = graphicBuffer;

@@ -218,18 +218,6 @@ public:
                                     pid_t pid = -1,
                                     const audio_attributes_t* pAttributes = NULL);
 
-                        // DEPRECATED
-                        // explicit AudioTrack( int streamType,
-                        //             uint32_t sampleRate  = 0,
-                        //             int format = AUDIO_FORMAT_DEFAULT,
-                        //             int channelMask      = 0,
-                        //             int frameCount       = 0,
-                        //             uint32_t flags       = (uint32_t) AUDIO_OUTPUT_FLAG_NONE,
-                        //             callback_t cbf       = 0,
-                        //             void* user           = 0,
-                        //             int notificationFrames = 0,
-                        //             int sessionId        = 0);
-
     /* Terminates the AudioTrack and unregisters it from AudioFlinger.
      * Also destroys all resources associated with the AudioTrack.
      */
@@ -279,7 +267,6 @@ public:
      * See set() method above for possible return codes.
      */
             status_t    initCheck() const;
-
     /* Returns this track's estimated latency in milliseconds.
      * This includes the latency due to AudioTrack buffer size, AudioMixer (if any)
      * and audio hardware driver.
@@ -289,7 +276,7 @@ public:
     /* getters, see constructors and set() */
 
             audio_stream_type_t streamType() const;
-            audio_format_t format() const   { return mFormat; }
+            audio_format_t format() const;
 
     /* Return frame size in bytes, which for linear PCM is
      * channelCount * (bit depth per channel / 8).

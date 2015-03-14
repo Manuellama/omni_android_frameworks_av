@@ -245,8 +245,6 @@ status_t AudioPolicyService::getInputForAttr(const audio_attributes_t *attr,
     audio_source_t inputSource = attr->source;
 
     // already checked by client, but double-check in case the client wrapper is bypassed
-	//
-
     if (inputSource >= AUDIO_SOURCE_CNT && inputSource != AUDIO_SOURCE_HOTWORD &&
         inputSource != AUDIO_SOURCE_FM_TUNER) {
         return BAD_VALUE;
@@ -260,7 +258,6 @@ status_t AudioPolicyService::getInputForAttr(const audio_attributes_t *attr,
         ((inputSource == AUDIO_SOURCE_FM_TUNER) && !captureFmTunerAllowed())) {
         return BAD_VALUE;
     }
-
 
     sp<AudioPolicyEffects>audioPolicyEffects;
     {
@@ -360,15 +357,12 @@ status_t AudioPolicyService::setStreamVolumeIndex(audio_stream_type_t stream,
         return BAD_VALUE;
     }
     Mutex::Autolock _l(mLock);
-#ifndef ICS_AUDIO_BLOB
     if (mpAudioPolicy->set_stream_volume_index_for_device) {
         return mpAudioPolicy->set_stream_volume_index_for_device(mpAudioPolicy,
                                                                 stream,
                                                                 index,
                                                                 device);
-    } else
-#endif
-    {
+    } else {
         return mpAudioPolicy->set_stream_volume_index(mpAudioPolicy, stream, index);
     }
 }
@@ -384,15 +378,12 @@ status_t AudioPolicyService::getStreamVolumeIndex(audio_stream_type_t stream,
         return BAD_VALUE;
     }
     Mutex::Autolock _l(mLock);
-#ifndef ICS_AUDIO_BLOB
     if (mpAudioPolicy->get_stream_volume_index_for_device) {
         return mpAudioPolicy->get_stream_volume_index_for_device(mpAudioPolicy,
                                                                 stream,
                                                                 index,
                                                                 device);
-    } else
-#endif
-    {
+    } else {
         return mpAudioPolicy->get_stream_volume_index(mpAudioPolicy, stream, index);
     }
 }

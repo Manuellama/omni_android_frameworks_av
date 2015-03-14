@@ -293,7 +293,6 @@ extern "C" status_t _ZN7android11AudioSystem19getOutputFrameCountEPii(size_t* fr
     return AudioSystem::getOutputFrameCount(frameCount, streamType);
 }
 
-
 status_t AudioSystem::getOutputFrameCount(size_t* frameCount, audio_stream_type_t streamType)
 {
     audio_io_handle_t output;
@@ -647,7 +646,7 @@ audio_policy_forced_cfg_t AudioSystem::getForceUse(audio_policy_force_use_t usag
     return aps->getForceUse(usage);
 }
 
-
+ 
 extern "C" audio_io_handle_t _ZN7android11AudioSystem9getOutputE19audio_stream_type_tjjj27audio_policy_output_flags_t(audio_stream_type_t stream,
                                     uint32_t samplingRate,
                                     uint32_t format,
@@ -893,15 +892,10 @@ void AudioSystem::clearAudioConfigCache()
 
 bool AudioSystem::isOffloadSupported(const audio_offload_info_t& info)
 {
-#ifndef ICS_AUDIO_BLOB
     ALOGV("isOffloadSupported()");
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return false;
     return aps->isOffloadSupported(info);
-#else
-	ALOGV("isOffloadSupported() non existant in ICS, false");
-	return false;
-#endif
 }
 
 status_t AudioSystem::listAudioPorts(audio_port_role_t role,

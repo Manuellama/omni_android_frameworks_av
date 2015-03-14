@@ -1839,7 +1839,6 @@ void AudioFlinger::PlaybackThread::readOutputParameters_l()
                 mFrameCount);
     }
 
-
     if ((mOutput->flags & AUDIO_OUTPUT_FLAG_NON_BLOCKING) &&
             (mOutput->stream->set_callback != NULL)) {
         if (mOutput->stream->set_callback(mOutput->stream,
@@ -1848,7 +1847,6 @@ void AudioFlinger::PlaybackThread::readOutputParameters_l()
             mCallbackThread = new AudioFlinger::AsyncCallbackThread(this);
         }
     }
-
 
     mHwSupportsPause = false;
     if (mOutput->flags & AUDIO_OUTPUT_FLAG_DIRECT) {
@@ -2180,7 +2178,6 @@ ssize_t AudioFlinger::PlaybackThread::threadLoop_write()
 
 void AudioFlinger::PlaybackThread::threadLoop_drain()
 {
-#ifndef AUDIO_LEGACY_HACK
     if (mOutput->stream->drain) {
         ALOGV("draining %s", (mMixerStatus == MIXER_DRAIN_TRACK) ? "early" : "full");
         if (mUseAsyncWrite) {
@@ -2193,7 +2190,6 @@ void AudioFlinger::PlaybackThread::threadLoop_drain()
             (mMixerStatus == MIXER_DRAIN_TRACK) ? AUDIO_DRAIN_EARLY_NOTIFY
                                                 : AUDIO_DRAIN_ALL);
     }
-#endif
 }
 
 void AudioFlinger::PlaybackThread::threadLoop_exit()
@@ -3111,13 +3107,11 @@ void AudioFlinger::MixerThread::threadLoop_mix()
     int64_t pts;
     status_t status = INVALID_OPERATION;
 
-#ifndef ICS_AUDIO_BLOB
     if (mNormalSink != 0) {
         status = mNormalSink->getNextWriteTimestamp(&pts);
     } else {
         status = mOutputSink->getNextWriteTimestamp(&pts);
     }
-#endif
 
     if (status != NO_ERROR) {
         pts = AudioBufferProvider::kInvalidPTS;
@@ -4480,17 +4474,13 @@ AudioFlinger::OffloadThread::OffloadThread(const sp<AudioFlinger>& audioFlinger,
 
 void AudioFlinger::OffloadThread::threadLoop_exit()
 {
-
     if (mFlushPending || mHwPaused) {
         // If a flush is pending or track was paused, just discard buffered data
         flushHw_l();
     } else {
-
         mMixerStatus = MIXER_DRAIN_ALL;
         threadLoop_drain();
-
     }
-
     if (mUseAsyncWrite) {
         ALOG_ASSERT(mCallbackThread != 0);
         mCallbackThread->exit();
@@ -4684,7 +4674,6 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::OffloadThread::prepareTr
     // If a flush is pending and a track is active but the HW is not paused, force a HW pause
     // before flush and then resume HW. This can happen in case of pause/flush/resume
     // if resume is received before pause is executed.
-
     if (!mStandby && (doHwPause || (mFlushPending && !mHwPaused && (count != 0)))) {
         mOutput->stream->pause(mOutput->stream);
     }
@@ -4695,7 +4684,6 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::OffloadThread::prepareTr
     if (!mStandby && doHwResume) {
         mOutput->stream->resume(mOutput->stream);
     }
-
 
     // remove all the tracks that need to be...
     removeTracks_l(*tracksToRemove);
@@ -4722,7 +4710,6 @@ bool AudioFlinger::OffloadThread::waitingAsyncCallback()
 
 void AudioFlinger::OffloadThread::flushHw_l()
 {
-
     DirectOutputThread::flushHw_l();
     // Flush anything still waiting in the mixbuffer
     mCurrentWriteLength = 0;
@@ -4738,7 +4725,6 @@ void AudioFlinger::OffloadThread::flushHw_l()
         mCallbackThread->setWriteBlocked(mWriteAckSequence);
         mCallbackThread->setDraining(mDrainSequence);
     }
-
 }
 
 void AudioFlinger::OffloadThread::onAddNewTrack_l()
