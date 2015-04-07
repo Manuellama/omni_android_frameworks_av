@@ -99,14 +99,6 @@ LOCAL_SHARED_LIBRARIES := \
         libz \
         libpowermanager
 
-ifeq ($(TARGET_BOARD_PLATFORM),omap4 s5pc110 exynos4)
-LOCAL_CFLAGS := -DBOARD_CANT_REALLOCATE_OMX_BUFFERS
-endif
-
-ifeq ($(BOARD_USES_LEGACY_ACQUIRE_WVM),true)
-LOCAL_CFLAGS := -DUSES_LEGACY_ACQUIRE_WVM
-endif
-
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_color_conversion \
         libstagefright_aacenc \
@@ -128,6 +120,7 @@ LOCAL_SHARED_LIBRARIES += \
 
 LOCAL_CFLAGS += -Wno-multichar
 
+
 ifeq ($(BOARD_USE_SAMSUNG_COLORFORMAT), true)
 LOCAL_CFLAGS += -DUSE_SAMSUNG_COLORFORMAT
 
@@ -136,6 +129,14 @@ LOCAL_C_INCLUDES += \
 	$(TOP)/hardware/samsung/exynos4/hal/include \
 	$(TOP)/hardware/samsung/exynos4/include
 
+endif
+
+ifeq ($(BOARD_CANT_REALLOCATE_OMX_BUFFERS),true)
+LOCAL_CFLAGS += -DBOARD_CANT_REALLOCATE_OMX_BUFFERS
+endif
+
+ifeq ($(BOARD_USES_LEGACY_ACQUIRE_WVM),true)
+LOCAL_CFLAGS += -DUSES_LEGACY_ACQUIRE_WVM
 endif
 
 LOCAL_MODULE:= libstagefright
