@@ -128,7 +128,6 @@ LOCAL_CFLAGS += -DUSE_SAMSUNG_COLORFORMAT
 LOCAL_C_INCLUDES += \
 	$(TOP)/hardware/samsung/exynos4/hal/include \
 	$(TOP)/hardware/samsung/exynos4/include
-
 endif
 
 ifeq ($(BOARD_CANT_REALLOCATE_OMX_BUFFERS),true)
