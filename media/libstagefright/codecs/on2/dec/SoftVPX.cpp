@@ -168,7 +168,7 @@ void SoftVPX::onQueueFilled(OMX_U32 portIndex) {
             for (size_t i = 0; i < img->d_h / 2; ++i) {
                 memcpy(dst, srcLine, img->d_w / 2);
 
-                srcLine += img->stride[VPX_VPX_PLANE_U];
+                srcLine += img->stride[VPX_PLANE_U];
                 dst += img->d_w / 2;
             }
 
